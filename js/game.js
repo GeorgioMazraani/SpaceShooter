@@ -14,7 +14,7 @@ class Game {
         this.sprites = [];
         this.keys = {}; // Store active keys
         this.paused = false; // Initial pause state
-        this.resetart = false;
+        this.restart = false;
         this.bindKeyboardEvents();
     }
 

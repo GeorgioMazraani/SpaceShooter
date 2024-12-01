@@ -1,129 +1,168 @@
 class LevelManager {
     constructor(game) {
         this.game = game;
-        this.currentLevel = 1;
-        this.levels = {
-            1: {
-                name: "New Frontier",
-                spawnRate: 200,
-                enemyConfig: { speed: 1, health: 1 },
-                asteroidConfig: { speed: 0.5, size: 50 },
-                duration: 30000, // Level duration in milliseconds
-                difficulty: "Low",
-            },
-            2: {
-                name: "The Swarm",
-                spawnRate: 150,
-                enemyConfig: { speed: 2, health: 2, shooting: true },
-                asteroidConfig: { speed: 1, size: 75 },
-                duration: 45000,
-                difficulty: "Medium",
-            },
-            3: {
-                name: "Chaos Rising",
-                spawnRate: 100,
-                enemyConfig: { speed: 3, health: 3, elite: true },
-                asteroidConfig: { speed: 1.5, size: 100, special: true },
-                duration: 60000,
-                difficulty: "High",
-            },
-        };
-        this.levelTimer = 0; // Time elapsed in the current level
+        this.currentLevel = 1; // Start at level 1
+        this.levels = [this.setupLevel1.bind(this), this.setupLevel2.bind(this)];
+        this.frameCounter = 0; // Track time
+        this.framesPerSecond = 60; // Game runs at 60 FPS
+        this.levelDurationFrames = 120 * this.framesPerSecond; // 120 seconds for Level 1
+        this.money = 0; // Player's money
+        this.bossCreated = false; // Track if the boss has been created
     }
 
-    // Start a specific level
-    startLevel(level) {
+    /**
+     * Starts the specified level
+     * @param {number} level - The level number to start
+     */
+    startLevel(level, selectedBullet = "Default", shieldPurchased = false) {
+        console.log(`Starting Level ${level}`);
         this.currentLevel = level;
-        const config = this.levels[level];
-        if (!config) {
-            console.error(`Level ${level} configuration not found`);
+        this.frameCounter = 0; // Reset frame counter
+        this.game.sprites = []; // Clear previous sprites
+        this.bossCreated = false; // Reset bossCreated for each level
+        this.levels[level - 1](selectedBullet, shieldPurchased); // Setup the selected level
+    }
+
+    /**
+     * Sets up Level 1
+     */
+    setupLevel1() {
+        console.log("Setting up Level 1: Basic enemies");
+
+        // Add the background
+        const background = new Background('../assets/bg.png', 1, this.game.canvas);
+        this.game.addSprite(background);
+
+        // Add the player's plane
+        const plane = new Plane(200, 400, 2, this.game);
+        this.game.addSprite(plane);
+
+        // Add the enemy spawner for Level 1
+        const enemySpawner = new EnemySpawner(this.game, 1);
+        this.game.addSprite(enemySpawner);
+
+        // Add money tracker and score tracker
+        const moneyTracker = new MoneyTracker(10, 40);
+        this.game.addSprite(moneyTracker);
+        const score = new Score(10, 10);
+        this.game.addSprite(score);
+
+        // Add timer for Level 1
+        const timer = new Timer(this.game.canvas.width - 60, 30, 120, this.game); // Timer at top-right
+        this.game.addSprite(timer);
+
+        // Track the timer and money tracker
+        this.timer = timer;
+        this.moneyTracker = moneyTracker;
+    }
+
+    /**
+     * Sets up Level 2
+     */
+    setupLevel2(selectedBullet, shieldPurchased) {
+        console.log("Setting up Level 2: Harder enemies, asteroids, and a boss");
+
+        // Add the background
+        const background = new Background('../assets/bg.png', 1, this.game.canvas);
+        this.game.addSprite(background);
+
+        // Add the player's plane
+        const plane = new Plane(200, 500, 2, this.game);
+        plane.bulletType = selectedBullet || "Default"; // Default to "Default" if none selected
+        plane.hasShield = shieldPurchased || false; // Default to false if no shield purchased
+        this.game.addSprite(plane);
+
+        // Add the enemy spawner
+        const enemySpawner = new AdvancedEnemySpawner(this.game);
+        this.game.addSprite(enemySpawner);
+
+        // Add asteroids
+        for (let i = 0; i < 5; i++) {
+            const x = Math.random() * (this.game.canvas.width - 132);
+            const y = -137; // Spawn off-screen
+            this.game.addSprite(new Asteroid(x, y, this.game));
+        }
+
+        // Add the final boss
+        const boss = new BossAlien(
+            this.game.canvas.width / 2 - 75, // Center horizontally
+            -100, // Spawn off-screen
+            150, // Boss width
+            150, // Boss height
+            0.5, // Speed
+            this.game
+        );
+        this.game.addSprite(boss);
+        this.bossCreated = true; // Mark the boss as created
+
+        console.log("Level 2 setup complete");
+    }
+
+    /**
+     * Transition to Level 2 Menu and Start Level 2
+     */
+    transitionToLevel2Menu() {
+        this.game.paused = true; // Pause the game
+        this.money = this.moneyTracker.money; // Retrieve collected money
+
+        const menu = new lv2Menu(this.game, this.money);
+
+        const drawMenu = () => {
+            if (this.game.paused) {
+                menu.draw(); // Draw the menu
+                requestAnimationFrame(drawMenu);
+            }
+        };
+
+        // Handle "Play" button or "Enter" to start Level 2
+        const startLevel2 = () => {
+            this.game.paused = false; // Resume the game
+            this.startLevel(2, menu.selectedBullet, menu.shieldPurchased); // Pass upgrades
+            window.removeEventListener("keydown", handleKeydown);
+        };
+
+        const handleKeydown = (e) => {
+            menu.handleInput(e.key); // Navigate menu
+            if (e.key === "Enter") {
+                startLevel2();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeydown);
+        drawMenu();
+    }
+
+    /**
+     * Updates the level state
+     */
+    updateLevel() {
+        const boss = this.game.sprites.find(sprite => sprite instanceof BossAlien);
+        const plane = this.game.sprites.find(sprite => sprite instanceof Plane);
+
+        // Level 1: End after duration
+        if (this.currentLevel === 1) {
+            this.frameCounter++;
+            if (this.frameCounter >= this.levelDurationFrames) {
+                console.log("Level 1 complete! Transitioning to Level 2 Menu...");
+                this.transitionToLevel2Menu();
+                return;
+            }
+        }
+
+        // Level 2: Check if the player has won (boss defeated)
+        if (this.currentLevel === 2 && this.bossCreated && !boss) {
+            console.log("You won the game!");
+            this.game.paused = true;
+            alert("Congratulations! You won!");
             return;
         }
 
-        console.log(`Starting Level ${level}: ${config.name}`);
-        this.game.sprites = []; // Reset all sprites for the new level
-        this.levelTimer = 0;
-
-        // Add background and static elements
-        const background = new Background("../assets/bg.png", 1, this.game.canvas);
-        this.game.addSprite(background);
-
-        const plane = new Plane(200, 500, 2, this.game);
-        this.game.addSprite(plane);
-
-        const score = new Score(0, 0);
-        this.game.addSprite(score);
-
-        // Spawn level-specific enemies and obstacles
-        this.spawnEnemies(config.enemyConfig, config.spawnRate);
-        this.spawnAsteroids(config.asteroidConfig);
-
-        // Display level name or transition screen
-        this.displayLevelStartMessage(config.name);
-    }
-
-    // Spawn enemies based on configuration
-    spawnEnemies(config, spawnRate) {
-        const enemySpawner = new EnemySpawner(this.game, config, spawnRate);
-        this.game.addSprite(enemySpawner);
-    }
-
-    // Spawn asteroids based on configuration
-    spawnAsteroids(config) {
-        const asteroidSpawner = new AsteroidSpawner(this.game, config);
-        this.game.addSprite(asteroidSpawner);
-    }
-
-    // Progress to the next level
-    nextLevel() {
-        if (this.currentLevel < Object.keys(this.levels).length) {
-            this.startLevel(this.currentLevel + 1);
-        } else {
-            this.completeGame();
+        // Check if the player has lost (Plane destroyed)
+        if (!plane || !plane.isActive) {
+            console.log("You lost the game!");
+            this.game.paused = true;
+            alert("Game Over! Try again.");
+            return;
         }
-    }
-
-    // Update the level's timer and check for completion
-    update(deltaTime) {
-        const config = this.levels[this.currentLevel];
-        this.levelTimer += deltaTime;
-
-        if (this.levelTimer >= config.duration) {
-            console.log(`Level ${this.currentLevel} completed!`);
-            this.nextLevel();
-        }
-    }
-
-    // Display level start message
-    displayLevelStartMessage(levelName) {
-        const ctx = this.game.ctx;
-        ctx.fillStyle = "white";
-        ctx.font = "30px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(`Level: ${levelName}`, this.game.canvas.width / 2, this.game.canvas.height / 2);
-
-        setTimeout(() => {
-            ctx.clearRect(0, 0, this.game.canvas.width, this.game.canvas.height);
-        }, 3000); // Display message for 3 seconds
-    }
-
-    // Handle game completion
-    completeGame() {
-        console.log("Game Completed! You win!");
-        const ctx = this.game.ctx;
-        ctx.fillStyle = "white";
-        ctx.font = "40px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Congratulations! You Completed the Game!", this.game.canvas.width / 2, this.game.canvas.height / 2);
-
-        setTimeout(() => {
-            this.resetGame();
-        }, 5000); // Wait 5 seconds and reset the game
-    }
-
-    // Reset the game to the main menu or first level
-    resetGame() {
-        this.currentLevel = 1;
-        this.startLevel(1);
     }
 }

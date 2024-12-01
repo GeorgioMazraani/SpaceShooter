@@ -7,8 +7,9 @@ backgroundMusic.volume = 0.5;
 // Initialize the menu
 const menu = new Menu(game.canvas, game.ctx, game);
 
-// Initialize the LevelManager
+// Initialize the level manager
 const levelManager = new LevelManager(game);
+game.levelManager = levelManager;
 
 // Animation loop for the menu
 function animateMenu() {
@@ -25,11 +26,11 @@ function animateMenu() {
 function startGame() {
     backgroundMusic.play();
 
-    // Add a background that persists across levels
+    // Add the background
     const background = new Background('../assets/bg.png', 1, game.canvas);
     game.addSprite(background);
 
-    // Add the plane (player character)
+    // Add the player's plane
     const plane = new Plane(200, 500, 2, game);
     game.addSprite(plane);
 
@@ -41,21 +42,17 @@ function startGame() {
     levelManager.startLevel(1);
 
     // Start the game loop
+    game.animate = function () {
+        if (!this.paused) {
+            this.update();
+            this.draw();
+            levelManager.updateLevel(); // Check and handle level progression
+        }
+        requestAnimationFrame(() => this.animate());
+    };
+
     game.animate();
 }
-
-// Monitor level completion
-game.onLevelComplete = () => {
-    // Check if there is a next level
-    if (levelManager.currentLevel < 3) {
-        levelManager.nextLevel();
-    } else {
-        console.log('Game Completed! You win!');
-        // Optionally, restart the game or show a win screen
-        menu.showing = true;
-        animateMenu();
-    }
-};
 
 // Begin with the menu animation loop
 animateMenu();

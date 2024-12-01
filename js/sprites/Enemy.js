@@ -1,5 +1,5 @@
 class Enemy extends Sprite {
-    constructor(x, y, width, height, speed) {
+    constructor(x, y, width, height, speed, level) {
         super();
         this.x = x;
         this.y = y;
@@ -7,6 +7,7 @@ class Enemy extends Sprite {
         this.height = this.width;
         this.speed = speed;
         this.color = 'red';
+        this.level = level; // Store the current level
         this.explosionSound = new Audio('../assets/Sounds/explosion.wav');
         this.enemyImg = new Image();
         this.enemyImg.src = '../assets/enemy.png';
@@ -16,43 +17,47 @@ class Enemy extends Sprite {
         this.y += this.speed;
 
         if (this.y > 600) {
-            return true;
+            return true; // Remove the enemy if it goes off-screen
         }
 
         const plane = sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
             plane.isActive = false;
-            return true;
+            return true; // Remove the enemy
         }
 
         for (let sprite of sprites) {
             if (sprite instanceof Bullet && this.isColliding(sprite)) {
                 sprite.isActive = false;
 
-                // Play the explosion sound when enemy is hit
+                // Play the explosion sound
                 this.explosionSound.play().catch(err => console.error('Audio error:', err));
 
-                // Create an explosion at the enemy's position
-                const explosion = new Explosion(this.x,  // Use the enemy's X position
-                    this.y,  // Use the enemy's Y position
-                    this.width,     // Width of each explosion frame
-                    this.height);
+                // Create explosion
+                const explosion = new Explosion(this.x, this.y, this.width, this.height);
                 sprites.push(explosion);
 
                 // Update score
                 const scoreSprite = sprites.find(s => s instanceof Score);
                 if (scoreSprite) scoreSprite.addScore(1);
 
+                // Drop money only in Level 1 with a 30% chance
+                if (this.level === 1 && Math.random() < 0.3) { // 30% chance
+                    const money = new Money(this.x, this.y);
+                    sprites.push(money);
+                    console.log("Money dropped!");
+                }
+
                 // Randomly drop power-ups
-                if (Math.random() < 0.2) {
+                if (Math.random() < 0.2) { // 20% chance for power-ups
                     sprites.push(new PowerUp(this.x + this.width / 2 - 10, this.y + this.height, 'double-bullet'));
                 }
 
-                return true;
+                return true; // Mark the enemy as destroyed
             }
         }
 
-        return false;
+        return false; // Keep the enemy active
     }
 
     draw(ctx) {
@@ -66,7 +71,6 @@ class Enemy extends Sprite {
     }
 
     isColliding(sprite) {
-        if (!sprite) return false;
         return (
             this.x < sprite.x + sprite.width &&
             this.x + this.width > sprite.x &&

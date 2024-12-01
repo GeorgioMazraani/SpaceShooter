@@ -1,10 +1,10 @@
 class EnemySpawner extends Sprite {
-    constructor(game, config, spawnRate) {
+    constructor(game, level) {
         super();
         this.game = game;
-        this.config = config;
-        this.spawnInterval = spawnRate;
-        this.currentCooldown = spawnRate;
+        this.spawnInterval = 100;
+        this.currentCooldown = this.spawnInterval;
+        this.level = level;
     }
 
     update() {
@@ -14,26 +14,26 @@ class EnemySpawner extends Sprite {
         }
         this.currentCooldown = this.spawnInterval;
 
+        // Spawn regular enemies
         const x = Math.random() * (this.game.canvas.width - 30);
-        const enemy = new Enemy(x, 0, 30, 30, this.config.speed);
-        if (this.config.shooting) {
-            enemy.shoot = true; // Enable shooting enemies
-        }
-        if (this.config.elite) {
-            enemy.health = 5; // Increase health for elite enemies
-        }
+        const enemy = new Enemy(x, 0, 30, 30, 1, this.level);
         this.game.addSprite(enemy);
+        console.log('Regular enemy spawned!');
+
+        this.spawnInterval = Math.max(30, this.spawnInterval - 1); // Reduce spawn interval over time
         return false;
     }
 }
 
-class AsteroidSpawner extends Sprite {
-    constructor(game, config) {
+class AdvancedEnemySpawner extends Sprite {
+    constructor(game) {
         super();
         this.game = game;
-        this.config = config;
         this.spawnInterval = 200;
-        this.currentCooldown = 200;
+        this.currentCooldown = this.spawnInterval;
+        this.enemiesSpawned = 0;
+        this.bossSpawnThreshold = 5; // Spawn a boss every 5 enemies
+        this.asteroidSpawnThreshold = 10; // Spawn asteroids after 10 enemies
     }
 
     update() {
@@ -43,13 +43,37 @@ class AsteroidSpawner extends Sprite {
         }
         this.currentCooldown = this.spawnInterval;
 
-        const x = Math.random() * (this.game.canvas.width - this.config.size);
-        const asteroid = new Asteroid(x, 0, this.game);
-        asteroid.speed = this.config.speed;
-        if (this.config.special) {
-            asteroid.special = true; // Add special behavior
+        // Spawn regular enemies
+        const x = Math.random() * (this.game.canvas.width - 30);
+        const enemy = new Enemy(x, 0, 30, 30, 1);
+        this.game.addSprite(enemy);
+        console.log('Regular enemy spawned!');
+
+        // Spawn boss
+        if (this.enemiesSpawned > 0 && this.enemiesSpawned % this.bossSpawnThreshold === 0) {
+            const boss = new BossAlien(
+                this.game.canvas.width / 2 - 50,
+                -100,
+                100,
+                100,
+                0.5,
+                this.game
+            );
+            this.game.addSprite(boss);
+            console.log('BossAlien spawned!');
         }
-        this.game.addSprite(asteroid);
+
+        // Spawn asteroids
+        if (this.enemiesSpawned >= this.asteroidSpawnThreshold) {
+            const asteroidX = Math.random() * (this.game.canvas.width - 132);
+            const asteroidY = -137; // Spawn above the canvas
+            const asteroid = new Asteroid(asteroidX, asteroidY, this.game);
+            this.game.addSprite(asteroid);
+            console.log('Asteroid spawned!');
+        }
+
+        this.enemiesSpawned++;
+        this.spawnInterval = Math.max(30, this.spawnInterval - 1); // Reduce spawn interval over time
         return false;
     }
 }
