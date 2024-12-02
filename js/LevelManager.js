@@ -3,11 +3,14 @@ class LevelManager {
         this.game = game;
         this.currentLevel = 1; // Start at level 1
         this.levels = [this.setupLevel1.bind(this), this.setupLevel2.bind(this)];
-        this.frameCounter = 0; // Track time
+        this.frameCounter = 0; // Track time in frames
         this.framesPerSecond = 60; // Game runs at 60 FPS
-        this.levelDurationFrames = 120 * this.framesPerSecond; // 120 seconds for Level 1
+        this.levelDurationFrames = 30 * this.framesPerSecond; // 30 seconds for Level 1
         this.money = 0; // Player's money
         this.bossCreated = false; // Track if the boss has been created
+        this.miniBossSpawned = false; // Track if mini-boss has been spawned
+        this.finalBossSpawned = false; // Track if final boss has been spawned
+        this.advancedSpawner = null; // Reference for advanced enemy spawner
     }
 
     /**
@@ -48,7 +51,7 @@ class LevelManager {
         this.game.addSprite(score);
 
         // Add timer for Level 1
-        const timer = new Timer(this.game.canvas.width - 60, 30, 120, this.game); // Timer at top-right
+        const timer = new Timer(this.game.canvas.width - 60, 30, 30, this.game); // Timer at top-right
         this.game.addSprite(timer);
 
         // Track the timer and money tracker
@@ -60,42 +63,23 @@ class LevelManager {
      * Sets up Level 2
      */
     setupLevel2(selectedBullet, shieldPurchased) {
-        console.log("Setting up Level 2: Harder enemies, asteroids, and a boss");
+        console.log("Setting up Level 2 with advanced enemies and mini-bosses.");
 
         // Add the background
         const background = new Background('../assets/bg.png', 1, this.game.canvas);
         this.game.addSprite(background);
 
         // Add the player's plane
-        const plane = new Plane(200, 500, 2, this.game);
-        plane.bulletType = selectedBullet || "Default"; // Default to "Default" if none selected
-        plane.hasShield = shieldPurchased || false; // Default to false if no shield purchased
+        const plane = new Plane(200, 500, 3, this.game);
+        plane.bulletType = selectedBullet || "Default";
+        plane.hasShield = shieldPurchased || false;
         this.game.addSprite(plane);
 
-        // Add the enemy spawner
-        const enemySpawner = new AdvancedEnemySpawner(this.game);
-        this.game.addSprite(enemySpawner);
+        // Add advanced enemy spawner for Level 2
+        this.advancedSpawner = new AdvancedEnemySpawner(this.game);
+        this.game.addSprite(this.advancedSpawner);
 
-        // Add asteroids
-        for (let i = 0; i < 5; i++) {
-            const x = Math.random() * (this.game.canvas.width - 132);
-            const y = -137; // Spawn off-screen
-            this.game.addSprite(new Asteroid(x, y, this.game));
-        }
-
-        // Add the final boss
-        const boss = new BossAlien(
-            this.game.canvas.width / 2 - 75, // Center horizontally
-            -100, // Spawn off-screen
-            150, // Boss width
-            150, // Boss height
-            0.5, // Speed
-            this.game
-        );
-        this.game.addSprite(boss);
-        this.bossCreated = true; // Mark the boss as created
-
-        console.log("Level 2 setup complete");
+        console.log("Level 2 setup complete.");
     }
 
     /**
@@ -136,12 +120,17 @@ class LevelManager {
      * Updates the level state
      */
     updateLevel() {
-        const boss = this.game.sprites.find(sprite => sprite instanceof BossAlien);
+        // Find remaining entities
+        const enemies = this.game.sprites.filter(sprite => sprite instanceof Enemy);
+        const asteroids = this.game.sprites.filter(sprite => sprite instanceof Asteroid);
+        const miniBoss = this.game.sprites.find(sprite => sprite instanceof BossAlien);
         const plane = this.game.sprites.find(sprite => sprite instanceof Plane);
 
-        // Level 1: End after duration
+        // Increment the frame counter
+        this.frameCounter++;
+
+        // **Level 1 Completion Logic**
         if (this.currentLevel === 1) {
-            this.frameCounter++;
             if (this.frameCounter >= this.levelDurationFrames) {
                 console.log("Level 1 complete! Transitioning to Level 2 Menu...");
                 this.transitionToLevel2Menu();
@@ -149,20 +138,60 @@ class LevelManager {
             }
         }
 
-        // Level 2: Check if the player has won (boss defeated)
-        if (this.currentLevel === 2 && this.bossCreated && !boss) {
+        // **Mini-Boss Spawning**
+        if (
+            this.currentLevel === 2 &&
+            this.advancedSpawner &&
+            this.advancedSpawner.miniBossSpawnedCount < this.advancedSpawner.maxMiniBosses
+        ) {
+            // Mini-bosses are spawned by the spawner, so no additional logic here
+        }
+
+        // **Final Boss Spawning**
+        if (
+            this.currentLevel === 2 &&
+            this.advancedSpawner &&
+            this.advancedSpawner.miniBossSpawnedCount >= this.advancedSpawner.maxMiniBosses && // All mini-bosses spawned
+            !miniBoss && // All mini-bosses defeated
+            enemies.length === 0 && // All regular enemies cleared
+            asteroids.length === 0 && // All asteroids cleared
+            !this.finalBossSpawned // Final boss not yet spawned
+        ) {
+            this.spawnFinalBoss();
+        }
+
+        // **Level 2 Completion: Check if the player has won**
+        const finalBoss = this.game.sprites.find(sprite => sprite instanceof FinalBoss);
+        if (this.currentLevel === 2 && this.finalBossSpawned && !finalBoss) {
             console.log("You won the game!");
             this.game.paused = true;
             alert("Congratulations! You won!");
             return;
         }
 
-        // Check if the player has lost (Plane destroyed)
+        // **Check if the player has lost**
         if (!plane || !plane.isActive) {
             console.log("You lost the game!");
             this.game.paused = true;
             alert("Game Over! Try again.");
             return;
         }
+    }
+
+    /**
+     * Spawn the final boss
+     */
+    spawnFinalBoss() {
+        const finalBoss = new FinalBoss(
+            this.game,
+            this.game.canvas.width / 2 - 75,
+            20, // Top of the screen
+            150, // Boss width
+            50, // Boss height
+            200 // Boss health
+        );
+        this.game.addSprite(finalBoss);
+        this.finalBossSpawned = true;
+        console.log("Final Boss spawned!");
     }
 }

@@ -9,16 +9,13 @@ class PowerUp extends Sprite {
         this.speed = 2;
         this.image = new Image();
 
-        // Set power-up image and additional properties based on type
+        // Set power-up image based on type
         switch (type) {
             case 'double-bullet':
                 this.image.src = '../assets/bullets.png';
                 break;
             case 'shield':
                 this.image.src = '../assets/shield.png';
-                break;
-            case 'speed-boost':
-                this.image.src = '../assets/speed.png';
                 break;
             case 'extra-life':
                 this.image.src = '../assets/heart.png';
@@ -30,7 +27,7 @@ class PowerUp extends Sprite {
         this.y += this.speed;
 
         // Remove power-up if it goes off-screen
-        if (this.y > 550) {
+        if (this.y > 650) {
             return true;
         }
 
@@ -40,20 +37,16 @@ class PowerUp extends Sprite {
             // Apply power-up effect based on type
             switch (this.type) {
                 case 'double-bullet':
-                    plane.increaseBulletLines(); // Enable double bullets
+                    plane.increaseBulletLines();
                     console.log('Double bullet activated!');
                     break;
                 case 'shield':
-                    plane.hasShield = true; // Grant a shield
+                    plane.activateShield(); // Activate shield
                     console.log('Shield activated!');
                     break;
-                case 'speed-boost':
-                    plane.speedBoostDuration = 300; // Temporary speed boost (5 seconds at 60 FPS)
-                    console.log('Speed boost collected!');
-                    break;
                 case 'extra-life':
-                    plane.lives = (plane.lives || 1) + 1; // Add an extra life
-                    console.log('Extra life gained!');
+                    plane.restoreHealth(2); // Restore 2 health points
+                    console.log('Health restored!');
                     break;
                 default:
                     console.warn(`Unhandled power-up type: ${this.type}`);
@@ -65,12 +58,10 @@ class PowerUp extends Sprite {
     }
 
     draw(ctx) {
-        // Draw the power-up image
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
     }
 
     isColliding(sprite) {
-        // Check for collision with the plane
         return (
             this.x < sprite.x + sprite.width &&
             this.x + this.width > sprite.x &&

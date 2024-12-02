@@ -48,13 +48,15 @@ class Asteroid extends Sprite {
                 sprite.isActive = false; // Destroy bullet
 
                 // Create an explosion at the asteroid's location
-                const explosion = new AsteroidExplosion(this.x, this.y, this.width,     // Width of each explosion frame
-                    this.height); // Adjust size if needed
+                const explosion = new AsteroidExplosion(this.x, this.y, this.width, this.height);
                 this.game.sprites.push(explosion); // Add explosion to the game
 
                 // Optional: Play explosion sound
                 const explosionSound = new Audio('../assets/Sounds/explodeAsteroid.mp3');
                 explosionSound.play().catch(err => console.error('Audio error:', err));
+
+                // Drop shield or extra life with a random chance
+                this.dropPowerUp();
 
                 return true; // Destroy asteroid after collision
             }
@@ -83,6 +85,20 @@ class Asteroid extends Sprite {
             this.width,
             this.height
         );
+    }
+
+    // Drop a random power-up
+    dropPowerUp() {
+        const chance = Math.random();
+        if (chance < 0.3) { // 30% chance to drop a shield
+            const shield = new PowerUp(this.x, this.y, 'shield');
+            this.game.addSprite(shield);
+            console.log("Shield dropped!");
+        } else if (chance < 0.5) { // 20% chance to drop an extra life
+            const extraLife = new PowerUp(this.x, this.y, 'extra-life');
+            this.game.addSprite(extraLife);
+            console.log("Extra life dropped!");
+        }
     }
 
     // Collision detection
