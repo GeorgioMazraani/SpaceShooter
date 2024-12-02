@@ -52,7 +52,11 @@ class BossAlien extends Sprite {
 
         // Remove if health reaches zero
         if (this.health <= 0) {
-            this.spawnExplosion(sprites);
+            this.explosionSound.play().catch(err => console.error('Audio error:', err));
+
+            // Create explosion
+            const explosion = new Explosion(this.x, this.y, this.width, this.height);
+            sprites.push(explosion);
             return true;
         }
 
@@ -71,26 +75,7 @@ class BossAlien extends Sprite {
         this.game.addSprite(new BossBullet(bulletX, bulletY, 10, 20, 4));
     }
 
-    spawnExplosion(sprites) {
-        sprites.push(
-            new Explosion(
-                [
-                    '../assets/Explosion/explosion00_s.png',
-                    '../assets/Explosion/explosion01_s.png',
-                    '../assets/Explosion/explosion02_s.png',
-                    '../assets/Explosion/explosion03_s.png',
-                    '../assets/Explosion/explosion04_s.png',
-                    '../assets/Explosion/explosion05_s.png'
-                ],
-                this.x - 30,
-                this.y - 30,
-                120,
-                120,
-                90
-            )
-        );
-        console.log("Boss destroyed!");
-    }
+
 
     draw(ctx) {
         ctx.drawImage(

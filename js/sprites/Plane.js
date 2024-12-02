@@ -24,6 +24,7 @@ class Plane extends Sprite {
      */
     increaseBulletLines() {
         this.bulletLines = Math.min(this.bulletLines + 1, 3);
+        console.log(`Bullet lines increased! Current: ${this.bulletLines}`);
     }
 
     /**
@@ -37,10 +38,33 @@ class Plane extends Sprite {
 
     /**
      * Activate a temporary shield that prevents damage.
+     * @param {number} durationInSeconds - Duration of the shield in seconds.
      */
-    activateShield(durationInSeconds) {
+    activateShield(durationInSeconds = 10) {
         this.shieldActive = true;
         this.shieldDurationFrames = durationInSeconds * 60; // Convert duration to frames
+        console.log(`Shield activated for ${durationInSeconds} seconds!`);
+    }
+
+    /**
+     * Handle taking damage. Reduces health and deactivates the plane if health drops to 0.
+     * @param {number} amount - Amount of damage to take.
+     */
+    takeDamage(amount) {
+        if (this.shieldActive) {
+            console.log('Shield absorbed damage!');
+            return; // No damage taken if shield is active
+        }
+
+        this.health -= amount;
+        console.log(`Plane took ${amount} damage. Current health: ${this.health}`);
+
+        if (this.health <= 0) {
+            this.health = 0; // Prevent negative health
+            this.isActive = false; // Deactivate the plane
+            this.game.addSprite(new GameOver(this.game)); // Trigger game over
+            console.log('Game Over!');
+        }
     }
 
     handleMovement(keys) {
@@ -86,20 +110,8 @@ class Plane extends Sprite {
         for (const sprite of sprites) {
             if (sprite instanceof Enemy || sprite instanceof Asteroid || sprite instanceof BossBullet) {
                 if (this.isColliding(sprite)) {
-                    if (this.shieldActive) {
-                        // Absorb the hit if shield is active
-                        console.log('Shield absorbed damage!');
-                        sprite.isActive = false; // Destroy the colliding sprite
-                        continue;
-                    }
-
-                    sprite.isActive = false; // Destroy the colliding sprite
-                    this.health -= 2; // Take damage
-
-                    if (this.health <= 0) {
-                        this.isActive = false;
-                        this.game.addSprite(new GameOver(this.game));
-                    }
+                    sprite.isActive = false; // Deactivate the colliding sprite
+                    this.takeDamage(2); // Take damage
                 }
             }
         }

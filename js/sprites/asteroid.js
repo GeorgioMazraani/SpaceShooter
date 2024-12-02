@@ -37,9 +37,8 @@ class Asteroid extends Sprite {
         // Handle collision with plane
         const plane = this.game.sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
-            // Trigger the restart screen if the asteroid hits the plane
-            this.game.showRestartScreen();
-            return true; // Destroy asteroid after collision
+            plane.takeDamage(2); // Reduce health by 2
+            return true; // Remove the enemy
         }
 
         // Handle collision with bullets

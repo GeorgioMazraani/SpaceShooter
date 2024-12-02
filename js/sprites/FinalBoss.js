@@ -10,6 +10,12 @@ class FinalBoss extends Sprite {
         this.maxHealth = health;
         this.speed = 2; // Movement speed
         this.movementOffset = 50; // Mimic player movement offset
+        this.bossImage = new Image();
+        this.bossImage.src = '../assets/finalBoss.png';
+        // Load and play the boss sound
+        this.bossSound = new Audio('../assets/Sounds/finalBoss.mp3');
+        this.bossSound.volume = 0.8; // Adjust volume
+        this.bossSound.play().catch((err) => console.error('Audio playback error:', err));
     }
 
     update() {
@@ -31,16 +37,18 @@ class FinalBoss extends Sprite {
     }
 
     draw(ctx) {
-        // Draw the boss
-        ctx.fillStyle = "red";
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.drawImage(
+            this.bossImage,
+            this.x,
+            this.y,
+            this.width,
+            this.height
+        );
 
-        // Draw health bar
         ctx.fillStyle = "green";
         const healthBarWidth = (this.health / this.maxHealth) * this.width;
         ctx.fillRect(this.x, this.y - 10, healthBarWidth, 5);
 
-        // Draw health background
         ctx.strokeStyle = "black";
         ctx.strokeRect(this.x, this.y - 10, this.width, 5);
     }
