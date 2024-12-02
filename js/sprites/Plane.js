@@ -1,5 +1,5 @@
 class Plane extends Sprite {
-    constructor(x, y, speed, game) {
+    constructor(x, y, speed, game, bulletType = "Default", shieldPurchased = false) {
         super();
         this.x = x;
         this.y = y;
@@ -17,8 +17,31 @@ class Plane extends Sprite {
         this.shieldDurationFrames = 0; // Shield timer in frames (60 FPS)
         this.jetImage = new Image();
         this.jetImage.src = '../assets/jet.png';
+
+        // Apply upgrades based on parameters
+        this.applyUpgrades(bulletType, shieldPurchased);
     }
 
+    /**
+     * Apply upgrades to the plane (e.g., bullet type, shield).
+     * @param {string} bulletType - The selected bullet type ("Default", "Double Bullet", etc.).
+     * @param {boolean} shieldPurchased - Whether the shield was purchased.
+     */
+    applyUpgrades(bulletType, shieldPurchased) {
+        // Apply bullet upgrade
+        if (bulletType === "Double Bullet") {
+            this.bulletLines = 2;
+            console.log("Upgraded to Double Bullet!");
+        } else if (bulletType === "Triple Bullet") {
+            this.bulletLines = 3;
+            console.log("Upgraded to Triple Bullet!");
+        }
+
+        // Apply shield upgrade
+        if (shieldPurchased) {
+            this.activateShield(20); // Activate shield for 10 seconds
+        }
+    }
     /**
      * Increase the number of bullet lines, up to a maximum of 3.
      */
@@ -52,7 +75,7 @@ class Plane extends Sprite {
      */
     takeDamage(amount) {
         if (this.shieldActive) {
-            console.log('Shield absorbed damage!');
+            console.log("Shield absorbed damage!");
             return; // No damage taken if shield is active
         }
 
@@ -63,11 +86,12 @@ class Plane extends Sprite {
             this.health = 0; // Prevent negative health
             this.isActive = false; // Deactivate the plane
             this.game.addSprite(new GameOver(this.game)); // Trigger game over
-            console.log('Game Over!');
+            console.log("Game Over!");
         }
     }
 
     handleMovement(keys) {
+
         if ((keys['ArrowLeft'] || keys['a']) && this.x - this.width / 2 > 0) {
             this.x -= this.speed;
         }
@@ -127,7 +151,7 @@ class Plane extends Sprite {
             this.shieldDurationFrames--;
             if (this.shieldDurationFrames <= 0) {
                 this.shieldActive = false;
-                console.log('Shield deactivated!');
+                console.log("Shield deactivated!");
             }
         }
 
