@@ -15,12 +15,11 @@ class Money extends Sprite {
         if (this.y > 600) {
             return true;
         }
-        console.log("Sprites array:", sprites.map(sprite => sprite.constructor.name));
+
 
         const plane = sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
             const moneyTracker = sprites.find(sprite => sprite instanceof MoneyTracker);
-            console.log(moneyTracker)
             if (moneyTracker) {
                 moneyTracker.addMoney(10);
                 console.log('Money collected!');

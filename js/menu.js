@@ -1,24 +1,35 @@
-class Menu {
+class Menu extends Sprite {
     constructor(canvas, ctx, game) {
+        super();
         this.canvas = canvas;
         this.ctx = ctx;
         this.game = game;
-        this.showing = true;
+        this.showing = true; // Whether the menu is currently showing
         this.bindEvents();
         this.backgroundImage = new Image();
         this.backgroundImage.src = '../assets/bgmenu.jpg';
-
+        this.onMenuExit = null; // Callback for when the menu is exited
     }
 
+    // Draw the menu
     draw() {
         if (!this.showing) return;
+
+        // Draw the background image or a fallback background
         if (this.backgroundImage.complete) {
-            this.ctx.drawImage(this.backgroundImage, 0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.drawImage(
+                this.backgroundImage,
+                0,
+                0,
+                this.canvas.width,
+                this.canvas.height
+            );
         } else {
             this.ctx.fillStyle = 'black';
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
+        // Draw title text
         this.ctx.fillStyle = 'red';
         this.ctx.font = '70px "Creepster", sans-serif';
         this.ctx.textAlign = 'center';
@@ -27,6 +38,7 @@ class Menu {
         this.ctx.fillText('ALIEN INVASION!', this.canvas.width / 2, 120);
         this.ctx.shadowBlur = 0;
 
+        // Draw story text
         this.ctx.font = '24px "Creepster", sans-serif';
         const storyGradient = this.ctx.createLinearGradient(
             this.canvas.width / 2 - 200,
@@ -51,6 +63,7 @@ class Menu {
         });
         this.ctx.shadowBlur = 0;
 
+        // Draw instructions
         this.ctx.font = '20px "Creepster", sans-serif';
         this.ctx.fillStyle = 'red';
         this.ctx.shadowColor = 'white';
@@ -68,6 +81,7 @@ class Menu {
         });
         this.ctx.shadowBlur = 0;
 
+        // Draw Play button
         this.ctx.shadowColor = 'red';
         this.ctx.shadowBlur = 20;
         this.ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
@@ -76,9 +90,9 @@ class Menu {
         this.ctx.fillStyle = 'red';
         this.ctx.font = '30px "Creepster", sans-serif';
         this.ctx.fillText('PLAY', this.canvas.width / 2, 640);
-
     }
 
+    // Bind click events for interaction
     bindEvents() {
         this.canvas.addEventListener('click', (e) => {
             if (!this.showing) return;
@@ -87,6 +101,7 @@ class Menu {
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
+            // Check if Play button is clicked
             if (
                 x >= this.canvas.width / 2 - 100 &&
                 x <= this.canvas.width / 2 + 100 &&
@@ -94,7 +109,18 @@ class Menu {
                 y <= 660
             ) {
                 this.showing = false;
+                if (this.onMenuExit) {
+                    this.onMenuExit(); // Trigger callback for exiting the menu
+                }
             }
         });
+    }
+
+    // Update method to remove itself once the menu is exited
+    update() {
+        if (!this.showing) {
+            return true; // Mark the sprite for removal
+        }
+        return false; // Keep the menu active
     }
 }

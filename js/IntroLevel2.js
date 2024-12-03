@@ -1,5 +1,6 @@
-class lv2Menu {
+class lv2Menu extends Sprite {
     constructor(game, money) {
+        super();
         this.game = game;
         this.money = money;
         this.bulletTypes = [
@@ -19,7 +20,6 @@ class lv2Menu {
         }
         this.options.push({ type: "Shield", cost: this.shieldCost });
     }
-
     handleInput(key) {
         switch (key) {
             case "ArrowUp":
@@ -31,10 +31,9 @@ class lv2Menu {
             case "Enter":
                 this.purchaseOption(this.selectedIndex);
                 break;
-            default:
-                break;
         }
     }
+
 
     purchaseOption(index) {
         const selectedOption = this.options[index];
@@ -49,11 +48,17 @@ class lv2Menu {
             } else {
                 this.selectBullet(selectedOption);
             }
-            selectedOption.cost = 0;
+            selectedOption.cost = 0; // Mark the option as purchased
+
+            console.log("Purchase successful. Starting Level 2...");
+            if (this.onMenuExit) {
+                this.onMenuExit(); // Trigger the menu exit to start Level 2
+            }
         } else {
             console.log("Not enough money!");
         }
     }
+
 
 
     selectBullet(bullet) {
