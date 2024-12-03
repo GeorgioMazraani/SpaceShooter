@@ -8,7 +8,7 @@ backgroundMusic.volume = 0.5;
 const menu = new Menu(game.canvas, game.ctx, game);
 
 // Initialize the level manager
-const levelManager = new LevelManager(game);
+const levelManager = new LevelManager(game, backgroundMusic);
 game.levelManager = levelManager;
 
 // Animation loop for the menu

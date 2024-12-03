@@ -12,7 +12,7 @@ class FinalBoss extends Sprite {
         this.movementOffset = 80; // Mimic player movement offset
         this.bossImage = new Image();
         this.bossImage.src = '../assets/finalBoss.png';
-        this.shootCooldown = 60; // Time between shots in frames
+        this.shootCooldown = 120; // Time between shots in frames
 
         // Load and play the boss sound
         this.bossSound = new Audio('../assets/Sounds/finalBoss.mp3');
@@ -35,23 +35,27 @@ class FinalBoss extends Sprite {
         // Handle shooting
         this.handleShooting();
 
+        // Handle being hit by player's bullets
+        this.handleCollisions(sprites);
+
         // Final boss is defeated when health is 0
         if (this.health <= 0) {
-            console.log("Final Boss defeated!");
-            this.game.sprites = this.game.sprites.filter(sprite => sprite !== this); // Remove boss
+            const explosion = new Explosion(this.x, this.y, this.width, this.height);
+            sprites.push(explosion);
+            return true;
         }
 
         return false;
     }
 
     /**
-     * Handle boss shooting from both sides
+     * Handle boss shooting bullets from left and right sides
      */
     handleShooting() {
         if (this.shootCooldown <= 0) {
-            // Shoot bullets from the left and right sides
-            const leftBullet = new BossBullet(this.x, this.y + this.height, 10, 20, 2);
-            const rightBullet = new BossBullet(this.x + this.width - 10, this.y + this.height, 10, 20, 2);
+            // Shoot a bullet from the left and right sides of the boss
+            const leftBullet = new BossBullet(this.x, this.y + this.height, 10, 20, 3);
+            const rightBullet = new BossBullet(this.x + this.width - 10, this.y + this.height, 10, 20, 3);
 
             this.game.addSprite(leftBullet);
             this.game.addSprite(rightBullet);
@@ -59,10 +63,23 @@ class FinalBoss extends Sprite {
             console.log("Final Boss shoots!");
 
             // Reset the cooldown
-            this.shootCooldown = 60; // Adjust based on desired shooting frequency
+            this.shootCooldown = 120; // Adjust to control shooting frequency
         } else {
             this.shootCooldown--; // Decrease cooldown
-        } a
+        }
+    }
+
+    /**
+     * Handle collisions with player's bullets
+     */
+    handleCollisions(sprites) {
+        for (let sprite of sprites) {
+            if (sprite instanceof Bullet && this.isColliding(sprite)) {
+                sprite.isActive = false; // Destroy the bullet
+                this.health -= 5; // Decrease health (adjust as needed)
+                console.log(`Final Boss hit! Health: ${this.health}`);
+            }
+        }
     }
 
     /**
@@ -84,5 +101,17 @@ class FinalBoss extends Sprite {
 
         ctx.strokeStyle = "black";
         ctx.strokeRect(this.x, this.y - 10, this.width, 5);
+    }
+
+    /**
+     * Check collision with another sprite
+     */
+    isColliding(sprite) {
+        return (
+            this.x < sprite.x + sprite.width &&
+            this.x + this.width > sprite.x &&
+            this.y < sprite.y + sprite.height &&
+            this.y + this.height > sprite.y
+        );
     }
 }

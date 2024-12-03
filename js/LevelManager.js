@@ -1,6 +1,7 @@
 class LevelManager {
-    constructor(game) {
+    constructor(game, backgroundMusic) {
         this.game = game;
+        this.backgroundMusic = backgroundMusic;
         this.currentLevel = 1; // Start at level 1
         this.frameCounter = 0; // Track time in frames
         this.framesPerSecond = 60; // Game runs at 60 FPS
@@ -159,18 +160,18 @@ class LevelManager {
 
         // Check if the player has lost
         if (!plane || !plane.isActive) {
-            console.log("You lost the game!");
-            this.game.paused = true;
-            alert("Game Over! Try again.");
+
+            this.game.addSprite(new GameOver(this.game, this, this.backgroundMusic, false));
             return;
+
         }
 
         // Check if the player has won
         const finalBoss = this.game.sprites.find(sprite => sprite instanceof FinalBoss);
         if (this.currentLevel === 2 && this.finalBossSpawned && !finalBoss) {
             console.log("You won the game!");
-            this.game.paused = true;
-            alert("Congratulations! You won!");
+            this.game.addSprite(new GameOver(this.game, this, this.backgroundMusic, true));
+
         }
     }
 
