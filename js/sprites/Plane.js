@@ -10,25 +10,19 @@ class Plane extends Sprite {
         this.width = 60;
         this.height = 60;
         this.game = game;
-        this.bulletLines = 1; // Number of bullet lines
-        this.health = 10; // Initial health
-        this.maxHealth = 10; // Max health for the plane
-        this.shieldActive = false; // Shield status
-        this.shieldDurationFrames = 0; // Shield timer in frames (60 FPS)
+        this.bulletLines = 1;
+        this.health = 10;
+        this.maxHealth = 10;
+        this.shieldActive = false;
+        this.shieldDurationFrames = 0;
         this.jetImage = new Image();
         this.jetImage.src = '../assets/jet.png';
 
-        // Apply upgrades based on parameters
         this.applyUpgrades(bulletType, shieldPurchased);
     }
 
-    /**
-     * Apply upgrades to the plane (e.g., bullet type, shield).
-     * @param {string} bulletType - The selected bullet type ("Default", "Double Bullet", etc.).
-     * @param {boolean} shieldPurchased - Whether the shield was purchased.
-     */
+
     applyUpgrades(bulletType, shieldPurchased) {
-        // Apply bullet upgrade
         if (bulletType === "Double Bullet") {
             this.bulletLines = 2;
             console.log("Upgraded to Double Bullet!");
@@ -37,55 +31,42 @@ class Plane extends Sprite {
             console.log("Upgraded to Triple Bullet!");
         }
 
-        // Apply shield upgrade
         if (shieldPurchased) {
-            this.activateShield(20); // Activate shield for 10 seconds
+            this.activateShield(20);
         }
     }
-    /**
-     * Increase the number of bullet lines, up to a maximum of 3.
-     */
+
     increaseBulletLines() {
         this.bulletLines = Math.min(this.bulletLines + 1, 3);
         console.log(`Bullet lines increased! Current: ${this.bulletLines}`);
     }
 
-    /**
-     * Restore health when collecting a heart power-up, up to the maximum health.
-     * @param {number} amount - Amount of health to restore.
-     */
     restoreHealth(amount) {
         this.health = Math.min(this.health + amount, this.maxHealth);
         console.log(`Health restored! Current health: ${this.health}`);
     }
 
-    /**
-     * Activate a temporary shield that prevents damage.
-     * @param {number} durationInSeconds - Duration of the shield in seconds.
-     */
+
     activateShield(durationInSeconds = 10) {
         this.shieldActive = true;
-        this.shieldDurationFrames = durationInSeconds * 60; // Convert duration to frames
+        this.shieldDurationFrames = durationInSeconds * 60;
         console.log(`Shield activated for ${durationInSeconds} seconds!`);
     }
 
-    /**
-     * Handle taking damage. Reduces health and deactivates the plane if health drops to 0.
-     * @param {number} amount - Amount of damage to take.
-     */
+
     takeDamage(amount) {
         if (this.shieldActive) {
             console.log("Shield absorbed damage!");
-            return; // No damage taken if shield is active
+            return;
         }
 
         this.health -= amount;
         console.log(`Plane took ${amount} damage. Current health: ${this.health}`);
 
         if (this.health <= 0) {
-            this.health = 0; // Prevent negative health
-            this.isActive = false; // Deactivate the plane
-            this.game.addSprite(new GameOver(this.game)); // Trigger game over
+            this.health = 0;
+            this.isActive = false;
+            this.game.addSprite(new GameOver(this.game));
             console.log("Game Over!");
         }
     }
@@ -110,7 +91,6 @@ class Plane extends Sprite {
         const bulletSpeed = 10;
 
         if (this.game.keys[' '] && this.shootCooldown <= 0) {
-            // Fire bullets based on the number of bullet lines
             if (this.bulletLines === 1) {
                 this.game.addSprite(new Bullet(this.x - 2.5, this.y - 10, 5, 10, bulletSpeed));
             } else if (this.bulletLines === 2) {
@@ -122,7 +102,7 @@ class Plane extends Sprite {
                 this.game.addSprite(new Bullet(this.x + 15, this.y - 10, 5, 10, bulletSpeed));
             }
 
-            this.shootCooldown = 20; // Set cooldown in frames
+            this.shootCooldown = 20;
         }
 
         if (this.shootCooldown > 0) {
@@ -134,8 +114,8 @@ class Plane extends Sprite {
         for (const sprite of sprites) {
             if (sprite instanceof Enemy || sprite instanceof Asteroid || sprite instanceof BossBullet) {
                 if (this.isColliding(sprite)) {
-                    sprite.isActive = false; // Deactivate the colliding sprite
-                    this.takeDamage(2); // Take damage
+                    sprite.isActive = false;
+                    this.takeDamage(2);
                 }
             }
         }
@@ -145,8 +125,6 @@ class Plane extends Sprite {
         this.handleMovement(keys);
         this.handleShooting();
         this.handleCollisions(sprites);
-
-        // Decrease shield duration over time
         if (this.shieldActive) {
             this.shieldDurationFrames--;
             if (this.shieldDurationFrames <= 0) {
@@ -155,7 +133,7 @@ class Plane extends Sprite {
             }
         }
 
-        return !this.isActive; // Return true if the plane should be removed
+        return !this.isActive;
     }
 
     draw(ctx) {
@@ -168,7 +146,6 @@ class Plane extends Sprite {
                 this.height
             );
 
-            // Draw health bar
             ctx.fillStyle = "red";
             ctx.fillRect(this.x - this.width / 2, this.y + this.height / 2 + 5, this.width, 5);
             ctx.fillStyle = "green";
@@ -179,7 +156,6 @@ class Plane extends Sprite {
                 5
             );
 
-            // Draw shield indicator
             if (this.shieldActive) {
                 ctx.strokeStyle = "blue";
                 ctx.lineWidth = 3;

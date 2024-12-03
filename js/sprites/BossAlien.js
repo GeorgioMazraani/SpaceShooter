@@ -24,17 +24,14 @@ class BossAlien extends Sprite {
     }
 
     update(sprites) {
-        // Sine wave motion
-        this.x += Math.sin(this.waveOffset) * this.amplitude * this.frequency; // Horizontal sine wave motion
-        this.waveOffset += this.frequency; // Increment wave position
-        this.y += this.speed; // Vertical downward movement
+        this.x += Math.sin(this.waveOffset) * this.amplitude * this.frequency;
+        this.waveOffset += this.frequency;
+        this.y += this.speed;
 
-        // Remove if out of bounds
         if (this.y > this.game.canvas.height) {
             return true;
         }
 
-        // Shooting logic
         if (this.currentCooldown <= 0) {
             this.shoot();
             this.currentCooldown = this.shootCooldown;
@@ -42,7 +39,6 @@ class BossAlien extends Sprite {
             this.currentCooldown--;
         }
 
-        // Collision with bullets
         for (let sprite of sprites) {
             if (sprite instanceof Bullet && this.isColliding(sprite)) {
                 this.takeDamage(sprite);
@@ -50,17 +46,15 @@ class BossAlien extends Sprite {
             }
         }
 
-        // Remove if health reaches zero
         if (this.health <= 0) {
             this.explosionSound.play().catch(err => console.error('Audio error:', err));
 
-            // Create explosion
             const explosion = new Explosion(this.x, this.y, this.width, this.height);
             sprites.push(explosion);
             return true;
         }
 
-        return false; // Boss remains active
+        return false;
     }
 
     takeDamage(sprite) {
@@ -86,7 +80,6 @@ class BossAlien extends Sprite {
             this.height
         );
 
-        // Draw health bar
         const healthBarWidth = (this.health / this.maxHealth) * this.width;
         ctx.fillStyle = "red";
         ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2 - 10, this.width, 5);

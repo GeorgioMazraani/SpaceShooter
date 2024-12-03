@@ -3,18 +3,18 @@ class Explosion extends Sprite {
         super();
         this.x = x;
         this.y = y;
-        this.width = width;  // The desired width on canvas
-        this.height = height; // The desired height on canvas
+        this.width = width;
+        this.height = height;
         this.frameIndex = 0;
         this.tickCount = 0;
-        this.ticksPerFrame = 5; // Adjust for animation speed
-        this.numberOfFrames = 60; // Total number of frames (6 rows * 10 columns)
-        this.rows = 6; // Number of rows in the sprite sheet
-        this.columns = 10; // Number of columns in the sprite sheet
-        this.frameWidth = 355;  // Width of each frame in the sprite sheet
-        this.frameHeight = 365; // Height of each frame in the sprite sheet
+        this.ticksPerFrame = 5;
+        this.numberOfFrames = 60;
+        this.rows = 6;
+        this.columns = 10;
+        this.frameWidth = 355;
+        this.frameHeight = 365;
         this.explosion = new Image();
-        this.explosion.src = "../assets/explosion.png"; // Path to the spritesheet
+        this.explosion.src = "../assets/explosion.png";
         this.orbExplosionSoundEffect = new Audio("../assets/Sounds/explosion.wav");
         this.orbExplosionSoundEffect.play();
     }
@@ -25,32 +25,30 @@ class Explosion extends Sprite {
             this.tickCount = 0;
             this.frameIndex++;
             if (this.frameIndex >= this.numberOfFrames) {
-                return true; // Animation finished
+                return true;
             }
         }
-        return false; // Animation still running
+        return false;
     }
 
     draw(ctx) {
-        // Calculate row and column for the current frame
-        const row = Math.floor(this.frameIndex / this.columns); // Row for current frame
-        const col = this.frameIndex % this.columns; // Column for current frame
+        const row = Math.floor(this.frameIndex / this.columns);
+        const col = this.frameIndex % this.columns;
 
-        // Draw the current frame from the spritesheet, scaling it to fit the canvas frame size
         ctx.drawImage(
             this.explosion,
-            col * this.frameWidth, // X position in the sprite sheet
-            row * this.frameHeight, // Y position in the sprite sheet
-            this.frameWidth,        // Width of the frame in the sprite sheet
-            this.frameHeight,       // Height of the frame in the sprite sheet
-            this.x,                 // X position on canvas
-            this.y,                 // Y position on canvas
-            this.width,             // Width on canvas (scaled size)
-            this.height             // Height on canvas (scaled size)
+            col * this.frameWidth,
+            row * this.frameHeight,
+            this.frameWidth,
+            this.frameHeight,
+            this.x,
+            this.y,
+            this.width,
+            this.height
         );
     }
 
     animationFinished() {
-        return this.frameIndex >= this.numberOfFrames; // Returns true when animation finishes
+        return this.frameIndex >= this.numberOfFrames;
     }
 }

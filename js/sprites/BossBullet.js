@@ -17,8 +17,8 @@ class BossBullet extends Sprite {
 
         const plane = sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
-            plane.takeDamage(2); // Reduce health by 2
-            return true; // Remove the enemy
+            plane.takeDamage(2);
+            return true;
         }
 
         return false;

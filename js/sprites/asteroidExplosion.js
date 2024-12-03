@@ -3,19 +3,19 @@ class AsteroidExplosion extends Sprite {
         super();
         this.x = x;
         this.y = y;
-        this.width = width; // Width of the explosion (scaled)
-        this.height = height; // Height of the explosion (scaled)
+        this.width = width;
+        this.height = height;
         this.frameIndex = 0;
         this.tickCount = 0;
-        this.ticksPerFrame = 5;  // Adjust animation speed
-        this.numberOfFrames = 60; // Total frames in the sprite sheet (6 rows * 10 columns)
-        this.rows = 6;           // Number of rows in the sprite sheet
-        this.columns = 10;       // Number of columns in the sprite sheet
-        this.frameWidth = 516;   // Width of each frame in the sprite sheet
-        this.frameHeight = 463;  // Height of each frame in the sprite sheet
+        this.ticksPerFrame = 5;
+        this.numberOfFrames = 60;
+        this.rows = 6;
+        this.columns = 10;
+        this.frameWidth = 516;
+        this.frameHeight = 463;
         this.explosion = new Image();
-        this.explosion.src = "../assets/asteroidExplosion.png"; // Path to the explosion sprite sheet
-        this.explosionSound = new Audio("../assets/Sounds/explodeAsteroid.mp3"); // Explosion sound effect
+        this.explosion.src = "../assets/asteroidExplosion.png";
+        this.explosionSound = new Audio("../assets/Sounds/explodeAsteroid.mp3");
         this.explosionSound.play();
     }
 
@@ -25,32 +25,30 @@ class AsteroidExplosion extends Sprite {
             this.tickCount = 0;
             this.frameIndex++;
             if (this.frameIndex >= this.numberOfFrames) {
-                return true;  // Return true when animation finishes
+                return true;
             }
         }
-        return false; // Animation still running
+        return false;
     }
 
     draw(ctx) {
-        // Calculate row and column for the current frame
-        const row = Math.floor(this.frameIndex / this.columns); // Row for the current frame
-        const col = this.frameIndex % this.columns; // Column for the current frame
+        const row = Math.floor(this.frameIndex / this.columns);
+        const col = this.frameIndex % this.columns;
 
-        // Draw the current frame from the sprite sheet
         ctx.drawImage(
             this.explosion,
-            col * this.frameWidth, // X position in the sprite sheet
-            row * this.frameHeight, // Y position in the sprite sheet
-            this.frameWidth,        // Width of each frame
-            this.frameHeight,       // Height of each frame
-            this.x,                 // X position on canvas
-            this.y,                 // Y position on canvas
-            this.width,             // Width on canvas
-            this.height             // Height on canvas
+            col * this.frameWidth,
+            row * this.frameHeight,
+            this.frameWidth,
+            this.frameHeight,
+            this.x,
+            this.y,
+            this.width,
+            this.height
         );
     }
 
     animationFinished() {
-        return this.frameIndex >= this.numberOfFrames;  // Returns true when animation finishes
+        return this.frameIndex >= this.numberOfFrames;
     }
 }

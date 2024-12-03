@@ -3,42 +3,40 @@ class Money extends Sprite {
         super();
         this.x = x;
         this.y = y;
-        this.width = 60; // Adjust size as needed
+        this.width = 60;
         this.height = 60;
         this.image = new Image();
-        this.image.src = '../assets/cash.png'; // Path to your money image
+        this.image.src = '../assets/cash.png';
     }
 
     update(sprites) {
-        this.y += 1; // Money falls slightly
+        this.y += 1;
 
         if (this.y > 600) {
-            return true; // Remove money if it goes off-screen
+            return true;
         }
-        console.log("Sprites array:", sprites.map(sprite => sprite.constructor.name)); // Debug log
+        console.log("Sprites array:", sprites.map(sprite => sprite.constructor.name));
 
-        // Check if the player collects the money
         const plane = sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
-            // Find the MoneyTracker and update it
             const moneyTracker = sprites.find(sprite => sprite instanceof MoneyTracker);
             console.log(moneyTracker)
             if (moneyTracker) {
-                moneyTracker.addMoney(10); // Add 10 units of money
+                moneyTracker.addMoney(10);
                 console.log('Money collected!');
             }
 
-            return true; // Remove money from the game
+            return true;
         }
 
-        return false; // Keep money active
+        return false;
     }
 
     draw(ctx) {
         if (this.image.complete) {
             ctx.drawImage(this.image, this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
         } else {
-            ctx.fillStyle = 'gold'; // Fallback color
+            ctx.fillStyle = 'gold';
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.width / 2, 0, Math.PI * 2);
             ctx.fill();

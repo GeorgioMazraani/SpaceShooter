@@ -4,9 +4,8 @@ class GameOver extends Sprite {
         this.game = game;
         this.levelManager = levelManager;
         this.backgroundMusic = backgroundMusic;
-        this.isVictory = isVictory; // Victory or defeat
+        this.isVictory = isVictory;
 
-        // Fade-in effect
         this.opacity = 0;
         this.restartTriggered = false;
 
@@ -26,10 +25,10 @@ class GameOver extends Sprite {
         if (keys['r'] && !this.restartTriggered) {
             this.restartTriggered = true;
             this.triggerRestart();
-            return true; // Remove GameOver sprite
+            return true;
         }
 
-        return false; // Keep active
+        return false;
     }
 
     draw(ctx) {
@@ -74,6 +73,6 @@ class GameOver extends Sprite {
             this.backgroundMusic.currentTime = 0;
         }
 
-        this.game.restart = true; // Trigger restart in the game engine
+        this.game.restart = true;
     }
 }

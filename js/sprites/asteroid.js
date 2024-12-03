@@ -3,76 +3,66 @@ class Asteroid extends Sprite {
         super();
         this.x = x;
         this.y = y;
-        this.width = 50; // Width of each asteroid frame
-        this.height = 50; // Height of each asteroid frame
+        this.width = 50;
+        this.height = 50;
         this.game = game;
 
         this.frameIndex = 0;
         this.tickCount = 0;
-        this.ticksPerFrame = 5; // Adjust to control animation speed
-        this.numberOfFrames = 42; // 6 columns * 7 rows
+        this.ticksPerFrame = 5;
+        this.numberOfFrames = 42;
         this.rows = 7;
         this.columns = 6;
         this.frameWidth = 128;
         this.frameHeight = 128;
         this.asteroidImg = new Image();
-        this.asteroidImg.src = "../assets/asteroid.png"; // Path to the asteroid sprite sheet
+        this.asteroidImg.src = "../assets/asteroid.png";
 
-        this.speed = 0.5; // Initial falling speed of the asteroid
-        this.maxSpeed = 2; // Maximum falling speed
+        this.speed = 0.5;
+        this.maxSpeed = 2;
     }
 
     update() {
-        // Move the asteroid downwards and increase its speed
         this.y += this.speed;
         if (this.speed < this.maxSpeed) {
-            this.speed += 0.05; // Increase the speed over time
+            this.speed += 0.05;
         }
 
-        // Check if the asteroid has fallen off the screen
         if (this.y > this.game.canvas.height) {
-            return true; // Remove asteroid if it goes off-screen
+            return true;
         }
 
-        // Handle collision with plane
         const plane = this.game.sprites.find(sprite => sprite instanceof Plane);
         if (plane && plane.isActive && this.isColliding(plane)) {
-            plane.takeDamage(2); // Reduce health by 2
-            return true; // Remove the enemy
+            plane.takeDamage(2);
+            return true;
         }
 
-        // Handle collision with bullets
         for (let sprite of this.game.sprites) {
             if (sprite instanceof Bullet && this.isColliding(sprite)) {
-                sprite.isActive = false; // Destroy bullet
+                sprite.isActive = false;
 
-                // Create an explosion at the asteroid's location
                 const explosion = new AsteroidExplosion(this.x, this.y, this.width, this.height);
-                this.game.sprites.push(explosion); // Add explosion to the game
+                this.game.sprites.push(explosion);
 
-                // Optional: Play explosion sound
                 const explosionSound = new Audio('../assets/Sounds/explodeAsteroid.mp3');
                 explosionSound.play().catch(err => console.error('Audio error:', err));
 
-                // Drop shield or extra life with a random chance
                 this.dropPowerUp();
 
-                return true; // Destroy asteroid after collision
+                return true;
             }
         }
 
-        // Update animation frame
         this.updateAnimation();
 
-        return false; // Keep asteroid active
+        return false;
     }
 
     draw(ctx) {
-        // Calculate row and column for the current frame
         const row = Math.floor(this.frameIndex / this.columns);
         const col = this.frameIndex % this.columns;
 
-        // Draw the current frame from the sprite sheet
         ctx.drawImage(
             this.asteroidImg,
             col * this.frameWidth,
@@ -86,21 +76,19 @@ class Asteroid extends Sprite {
         );
     }
 
-    // Drop a random power-up
     dropPowerUp() {
         const chance = Math.random();
-        if (chance < 0.3) { // 30% chance to drop a shield
+        if (chance < 0.3) {
             const shield = new PowerUp(this.x, this.y, 'shield');
             this.game.addSprite(shield);
             console.log("Shield dropped!");
-        } else if (chance < 0.5) { // 20% chance to drop an extra life
+        } else if (chance < 0.5) {
             const extraLife = new PowerUp(this.x, this.y, 'extra-life');
             this.game.addSprite(extraLife);
             console.log("Extra life dropped!");
         }
     }
 
-    // Collision detection
     isColliding(sprite) {
         return (
             this.x < sprite.x + sprite.width &&
@@ -110,14 +98,13 @@ class Asteroid extends Sprite {
         );
     }
 
-    // Handle asteroid animation
     updateAnimation() {
         this.tickCount++;
         if (this.tickCount > this.ticksPerFrame) {
             this.tickCount = 0;
             this.frameIndex++;
             if (this.frameIndex >= this.numberOfFrames) {
-                this.frameIndex = 0; // Loop back to the first frame
+                this.frameIndex = 0;
             }
         }
     }

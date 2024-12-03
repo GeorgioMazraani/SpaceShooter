@@ -28,7 +28,7 @@ class Game {
             this.paused = false;
             this.sprites = [];
         }
-        if (this.paused) return; // Skip updating if paused
+        if (this.paused) return;
 
         let updatedSprites = [];
         for (let i = 0; i < this.sprites.length; i++) {
@@ -52,16 +52,14 @@ class Game {
     }
 
     bindKeyboardEvents() {
-        // Handle keydown event
         window.addEventListener('keydown', (e) => {
-            this.keys[e.key] = true; // Mark the key as active
+            this.keys[e.key] = true;
 
-            // Handle pause and continue keys
             if (e.key === 'p') {
-                this.paused = true; // Pause the game
+                this.paused = true;
             }
             if (e.key === 'c') {
-                this.paused = false; // Resume the game
+                this.paused = false;
             }
         });
 

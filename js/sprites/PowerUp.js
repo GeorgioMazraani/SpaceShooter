@@ -9,7 +9,6 @@ class PowerUp extends Sprite {
         this.speed = 2;
         this.image = new Image();
 
-        // Set power-up image based on type
         switch (type) {
             case 'double-bullet':
                 this.image.src = '../assets/bullets.png';
@@ -25,33 +24,29 @@ class PowerUp extends Sprite {
 
     update(sprites) {
         this.y += this.speed;
-
-        // Remove power-up if it goes off-screen
         if (this.y > 650) {
             return true;
         }
 
-        // Check collision with the plane
         const plane = sprites.find(sprite => sprite instanceof Plane);
         if (plane && this.isColliding(plane)) {
-            // Apply power-up effect based on type
             switch (this.type) {
                 case 'double-bullet':
                     plane.increaseBulletLines();
                     console.log('Double bullet activated!');
                     break;
                 case 'shield':
-                    plane.activateShield(); // Activate shield
+                    plane.activateShield();
                     console.log('Shield activated!');
                     break;
                 case 'extra-life':
-                    plane.restoreHealth(2); // Restore 2 health points
+                    plane.restoreHealth(2);
                     console.log('Health restored!');
                     break;
                 default:
                     console.warn(`Unhandled power-up type: ${this.type}`);
             }
-            return true; // Remove power-up after collection
+            return true;
         }
 
         return false;
