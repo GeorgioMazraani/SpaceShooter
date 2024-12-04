@@ -51,7 +51,8 @@ class LevelManager extends Sprite {
 
         const background = new Background("../assets/bg.png", 1, this.game.canvas);
         this.game.addSprite(background);
-
+        const displayLevel = new DisplayLevel(this.game, this.currentLevel);
+        this.game.addSprite(displayLevel);
         const plane = new Plane(canvas.width / 2, canvas.height / 2, 3, this.game);
         this.game.addSprite(plane);
 
@@ -75,7 +76,8 @@ class LevelManager extends Sprite {
     setupLevel2() {
         const background = new Background("../assets/bg.png", 1, this.game.canvas);
         this.game.addSprite(background);
-
+        const displayLevel = new DisplayLevel(this.game, this.currentLevel);
+        this.game.addSprite(displayLevel);
         const plane = new Plane(
             canvas.width / 2,
             canvas.height / 2,
@@ -184,4 +186,33 @@ class LevelManager extends Sprite {
     }
 
 
+}
+
+class DisplayLevel extends Sprite {
+    constructor(game, level) {
+        super();
+        this.game = game;
+        this.level = level; // Current level to display
+    }
+
+    setLevel(level) {
+        this.level = level; // Update the level text
+    }
+
+    update() {
+        // No updates needed for static display
+        return false;
+    }
+
+    draw(ctx) {
+        // Draw a semi-transparent overlay at the top for better visibility
+        ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; // Black with 50% transparency
+        ctx.fillRect(0, 0, this.game.canvas.width, 40); // Adjust height to fit text
+
+        // Draw the level text
+        ctx.fillStyle = "white";
+        ctx.font = "30px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText(`Level ${this.level}`, this.game.canvas.width / 2, 30);
+    }
 }
