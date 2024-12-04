@@ -2,7 +2,7 @@ class EnemySpawner extends Sprite {
     constructor(game, level) {
         super();
         this.game = game;
-        this.spawnInterval = 100;
+        this.spawnInterval = 20;
         this.currentCooldown = this.spawnInterval;
         this.level = level;
     }
@@ -31,12 +31,12 @@ class AdvancedEnemySpawner extends Sprite {
         this.spawnInterval = 80;
         this.currentCooldown = this.spawnInterval;
         this.miniBossSpawnedCount = 0;
-        this.maxMiniBosses = 8;
-        this.miniBossSpawnCooldown = 200;
+        this.maxMiniBosses = 20;
+        this.miniBossSpawnCooldown = 100;
         this.miniBossCooldown = this.miniBossSpawnCooldown;
         this.enemiesSpawned = 0;
-        this.maxEnemies = 60;
-        this.asteroidSpawnCooldown = 400;
+        this.maxEnemies = 40;
+        this.asteroidSpawnCooldown = 300;
         this.currentAsteroidCooldown = this.asteroidSpawnCooldown;
     }
 

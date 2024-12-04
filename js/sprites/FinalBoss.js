@@ -8,38 +8,38 @@ class FinalBoss extends Sprite {
         this.height = height;
         this.health = health;
         this.maxHealth = health;
-        this.speed = 1;
-        this.movementOffset = 80;
+        this.speed = 1; // Horizontal movement speed
+        this.direction = 1; // 1 for right, -1 for left
         this.bossImage = new Image();
         this.bossImage.src = '../assets/finalBoss.png';
         this.shootCooldown = 120;
+
         this.bossSound = new Audio('../assets/Sounds/finalBoss.mp3');
         this.bossSound.volume = 0.8;
         this.bossSound.play().catch((err) => console.error('Audio playback error:', err));
     }
 
-
     update(sprites) {
-        const player = this.game.sprites.find(sprite => sprite instanceof Plane);
-        if (player) {
-            if (Math.abs(this.x - player.x) > this.movementOffset) {
-                this.x += this.speed * Math.sign(player.x - this.x);
-            }
+        // Move the boss left and right
+        this.x += this.speed * this.direction;
+
+        // Reverse direction when hitting the canvas edges
+        if (this.x <= 0 || this.x + this.width >= this.game.canvas.width) {
+            this.direction *= -1; // Reverse direction
         }
 
         this.handleShooting();
-
         this.handleCollisions(sprites);
 
+        // Check if health is zero or below
         if (this.health <= 0) {
             const explosion = new Explosion(this.x, this.y, this.width, this.height);
             sprites.push(explosion);
-            return true;
+            return true; // Remove the boss
         }
 
-        return false;
+        return false; // Keep the boss active
     }
-
 
     handleShooting() {
         if (this.shootCooldown <= 0) {
@@ -57,7 +57,6 @@ class FinalBoss extends Sprite {
         }
     }
 
-
     handleCollisions(sprites) {
         for (let sprite of sprites) {
             if (sprite instanceof Bullet && this.isColliding(sprite)) {
@@ -68,16 +67,10 @@ class FinalBoss extends Sprite {
         }
     }
 
-
     draw(ctx) {
-        ctx.drawImage(
-            this.bossImage,
-            this.x,
-            this.y,
-            this.width,
-            this.height
-        );
+        ctx.drawImage(this.bossImage, this.x, this.y, this.width, this.height);
 
+        // Draw health bar
         ctx.fillStyle = "green";
         const healthBarWidth = (this.health / this.maxHealth) * this.width;
         ctx.fillRect(this.x, this.y - 10, healthBarWidth, 5);
@@ -85,7 +78,6 @@ class FinalBoss extends Sprite {
         ctx.strokeStyle = "black";
         ctx.strokeRect(this.x, this.y - 10, this.width, 5);
     }
-
 
     isColliding(sprite) {
         return (

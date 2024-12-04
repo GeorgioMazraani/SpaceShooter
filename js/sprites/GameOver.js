@@ -8,13 +8,6 @@ class GameOver extends Sprite {
 
         this.opacity = 0;
         this.restartTriggered = false;
-
-        // Play appropriate sound
-        // this.gameOverSound = new Audio(
-        //     isVictory ? '../assets/Sounds/victory.mp3' : '../assets/Sounds/gameover.wav'
-        // );
-        // this.gameOverSound.volume = 0.7;
-        // this.gameOverSound.play().catch(err => console.error('Audio error:', err));
     }
 
     update(sprites, keys) {
@@ -22,10 +15,11 @@ class GameOver extends Sprite {
             this.opacity += 0.02; // Gradually increase opacity
         }
 
+        // Handle restart on "R" key press
         if (keys['r'] && !this.restartTriggered) {
             this.restartTriggered = true;
             this.triggerRestart();
-            return true;
+            return true; // Remove GameOver sprite
         }
 
         return false;
@@ -38,6 +32,7 @@ class GameOver extends Sprite {
         ctx.fillStyle = 'white';
         ctx.font = '50px Arial';
         ctx.textAlign = 'center';
+
         if (this.isVictory) {
             ctx.fillText('VICTORY!', this.game.canvas.width / 2, this.game.canvas.height / 2 - 100);
             ctx.font = '25px Arial';
@@ -68,11 +63,16 @@ class GameOver extends Sprite {
     }
 
     triggerRestart() {
+        console.log('Restarting the game...');
+
+        // Pause and reset background music
         if (this.backgroundMusic) {
             this.backgroundMusic.pause();
             this.backgroundMusic.currentTime = 0;
         }
 
+        // Use the restart flag to reinitialize the game
         this.game.restart = true;
+
     }
 }

@@ -92,10 +92,10 @@ class Plane extends Sprite {
 
         if (this.game.keys[' '] && this.shootCooldown <= 0) {
             if (this.bulletLines === 1) {
-                this.game.addSprite(new Bullet(this.x - 2.5, this.y - 10, 5, 10, bulletSpeed));
+                this.game.addSprite(new Bullet(this.x - 2.5, this.y - 10, 9, 10, bulletSpeed));
             } else if (this.bulletLines === 2) {
-                this.game.addSprite(new Bullet(this.x - 10, this.y - 10, 5, 10, bulletSpeed));
-                this.game.addSprite(new Bullet(this.x + 10, this.y - 10, 5, 10, bulletSpeed));
+                this.game.addSprite(new Bullet(this.x - 10, this.y - 10, 9, 10, bulletSpeed));
+                this.game.addSprite(new Bullet(this.x + 10, this.y - 10, 9, 10, bulletSpeed));
             } else if (this.bulletLines === 3) {
                 this.game.addSprite(new Bullet(this.x - 15, this.y - 10, 5, 10, bulletSpeed));
                 this.game.addSprite(new Bullet(this.x, this.y - 10, 5, 10, bulletSpeed));

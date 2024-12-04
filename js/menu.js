@@ -5,10 +5,11 @@ class Menu extends Sprite {
         this.ctx = ctx;
         this.game = game;
         this.showing = true;
-        this.bindEvents();
         this.backgroundImage = new Image();
         this.backgroundImage.src = '../assets/bgmenu.jpg';
         this.onMenuExit = null;
+        this.currentState = 'main';
+        this.click = new Audio('../assets/Sounds/click.mp3');
     }
 
     draw() {
@@ -27,91 +28,107 @@ class Menu extends Sprite {
             this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         }
 
-        this.ctx.fillStyle = 'red';
-        this.ctx.font = '70px "Creepster", sans-serif';
+        switch (this.currentState) {
+            case 'main':
+                this.drawMainMenu();
+                break;
+            case 'instructions':
+                this.drawInstructions();
+                break;
+            case 'story':
+                this.drawStory();
+                break;
+        }
+    }
+
+    drawMainMenu() {
+        this.ctx.fillStyle = 'rgba(0, 255, 128, 1)';
+        this.ctx.font = '80px "Creepster", sans-serif';
         this.ctx.textAlign = 'center';
-        this.ctx.shadowColor = 'black';
-        this.ctx.shadowBlur = 10;
-        this.ctx.fillText('ALIEN INVASION!', this.canvas.width / 2, 120);
+        this.ctx.shadowColor = 'rgba(0, 255, 128, 0.8)';
+        this.ctx.shadowBlur = 30;
+        this.ctx.fillText('ALIEN INVASION!', this.canvas.width / 2, 100);
         this.ctx.shadowBlur = 0;
 
-        this.ctx.font = '24px "Creepster", sans-serif';
-        const storyGradient = this.ctx.createLinearGradient(
-            this.canvas.width / 2 - 200,
-            0,
-            this.canvas.width / 2 + 200,
-            0
-        );
-        storyGradient.addColorStop(0, 'white');
-        storyGradient.addColorStop(1, 'lightgray');
-        this.ctx.fillStyle = storyGradient;
-        this.ctx.shadowColor = 'red';
-        this.ctx.shadowBlur = 5;
-
-        const story = [
-            "The year is 2523. Earth stands on the brink of annihilation.",
-            "Alien creatures have spread terror and destruction.",
-            "Their mission: To erase humanity.",
-            "You are our last hope. The future depends on you.",
-        ];
-        story.forEach((line, index) => {
-            this.ctx.fillText(line, this.canvas.width / 2, 280 + index * 40);
-        });
+        this.ctx.font = '30px "Creepster", sans-serif';
+        this.ctx.fillStyle = 'rgba(0, 191, 255, 1)';
+        this.ctx.shadowColor = 'rgba(0, 191, 255, 0.8)';
+        this.ctx.shadowBlur = 20;
+        this.ctx.fillText('Press "I" for Instructions', this.canvas.width / 2, 300);
+        this.ctx.fillText('Press "S" for Story', this.canvas.width / 2, 350);
+        this.ctx.fillText('Press "Enter" to Start', this.canvas.width / 2, 400);
         this.ctx.shadowBlur = 0;
+    }
 
-        this.ctx.font = '20px "Creepster", sans-serif';
-        this.ctx.fillStyle = 'red';
-        this.ctx.shadowColor = 'white';
-        this.ctx.shadowBlur = 10;
+    drawInstructions() {
+        this.ctx.font = '28px "Creepster", sans-serif';
+        this.ctx.fillStyle = 'rgba(0, 255, 128, 1)';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 255, 128, 0.8)';
+        this.ctx.shadowBlur = 20;
 
         const instructions = [
-            'Instructions:',
-            '- Arrow keys to move',
-            '- Spacebar to shoot',
-            '- Press "P" to pause',
-            '- Press "C" to continue',
+            'INSTRUCTIONS:',
+            '- Use Arrow Keys to Move',
+            '- Press Spacebar to Shoot',
+            '- Press "P" to Pause the Game',
+            '- Press "C" to Continue the Game',
+            '- Press "Enter" to Start the Game',
+            '',
+            'Press "B" to go back to the Main Menu',
         ];
         instructions.forEach((line, index) => {
-            this.ctx.fillText(line, this.canvas.width / 2, 450 + index * 30);
+            this.ctx.fillText(line, this.canvas.width / 2, 150 + index * 40);
         });
         this.ctx.shadowBlur = 0;
+    }
 
-        this.ctx.shadowColor = 'red';
+    drawStory() {
+        this.ctx.font = '28px "Creepster", sans-serif';
+        this.ctx.fillStyle = 'rgba(0, 255, 128, 1)';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0, 255, 128, 0.8)';
         this.ctx.shadowBlur = 20;
-        this.ctx.fillStyle = 'rgba(128, 128, 128, 0.5)';
-        this.ctx.fillRect(this.canvas.width / 2 - 100, 600, 200, 60);
-        this.ctx.shadowBlur = 0;
-        this.ctx.fillStyle = 'red';
-        this.ctx.font = '30px "Creepster", sans-serif';
-        this.ctx.fillText('PLAY', this.canvas.width / 2, 640);
-    }
 
-    bindEvents() {
-        this.canvas.addEventListener('click', (e) => {
-            if (!this.showing) return;
-
-            const rect = this.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            if (
-                x >= this.canvas.width / 2 - 100 &&
-                x <= this.canvas.width / 2 + 100 &&
-                y >= 600 &&
-                y <= 660
-            ) {
-                this.showing = false;
-                if (this.onMenuExit) {
-                    this.onMenuExit();
-                }
-            }
+        const story = [
+            'STORY:',
+            "The year is 2523. Earth stands on the brink of annihilation.",
+            "Alien creatures have invaded, spreading terror and destruction.",
+            "Level 1: Your mission is to collect money and prepare for battle.",
+            "Level 2: Upgrade your weapons and face the Final Boss.",
+            "Defeat the Final Boss, and the aliens will retreat.",
+            "Save humanity and restore peace to Earth!",
+            '',
+            'Press "B" to go back to the Main Menu',
+        ];
+        story.forEach((line, index) => {
+            this.ctx.fillText(line, this.canvas.width / 2, 150 + index * 40);
         });
+        this.ctx.shadowBlur = 0;
     }
 
-    update() {
-        if (!this.showing) {
+    update(sprites, keys) {
+        if (!this.showing) return true;
+
+        if (keys['Enter'] && this.currentState === 'main') {
+            this.showing = false;
+            if (this.onMenuExit) {
+                this.onMenuExit();
+            }
             return true;
         }
+
+        if (keys['i'] && this.currentState === 'main') {
+            this.click.play().catch(err => console.error("Audio error:", err));
+            this.currentState = 'instructions';
+        } else if (keys['s'] && this.currentState === 'main') {
+            this.click.play().catch(err => console.error("Audio error:", err));
+            this.currentState = 'story';
+        } else if (keys['b'] && (this.currentState === 'instructions' || this.currentState === 'story')) {
+            this.click.play().catch(err => console.error("Audio error:", err));
+            this.currentState = 'main';
+        }
+
         return false;
     }
 }

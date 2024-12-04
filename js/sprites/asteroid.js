@@ -6,7 +6,6 @@ class Asteroid extends Sprite {
         this.width = 50;
         this.height = 50;
         this.game = game;
-
         this.frameIndex = 0;
         this.tickCount = 0;
         this.ticksPerFrame = 5;

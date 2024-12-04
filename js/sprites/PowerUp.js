@@ -24,7 +24,7 @@ class PowerUp extends Sprite {
 
     update(sprites) {
         this.y += this.speed;
-        if (this.y > 650) {
+        if (this.y > 630) {
             return true;
         }
 

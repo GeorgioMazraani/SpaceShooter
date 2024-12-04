@@ -12,10 +12,16 @@ class lv2Menu extends Sprite {
         this.selectedBullet = "Default";
         this.shieldCost = 25;
         this.shieldPurchased = false;
-        this.options = [...this.bulletTypes, { type: "Shield", cost: this.shieldCost }];
+        this.options = [];
+        for (let i = 0; i < this.bulletTypes.length; i++) {
+            this.options.push(this.bulletTypes[i]);
+        }
+        this.options.push({ type: "Shield", cost: this.shieldCost });
         this.errorMessage = "";
         this.errorDisplayFrames = 0;
         this.isActive = true;
+        this.purchaseSound = new Audio('../assets/Sounds/purchase.mp3');
+        this.error = new Audio('../assets/Sounds/error.mp3');
     }
 
     handleInput(key) {
@@ -45,9 +51,14 @@ class lv2Menu extends Sprite {
                 this.shieldPurchased = true;
                 this.money -= selectedOption.cost;
                 selectedOption.cost = 0;
+
+                // Play purchase sound
+                this.purchaseSound.play().catch(err => console.error("Audio error:", err));
             } else {
                 this.errorMessage = "Not enough money!";
-                this.errorDisplayFrames = 60;
+                this.error.play().catch(err => console.error("Audio error:", err));
+                this.errorDisplayFrames = 180;
+
             }
             return;
         }
@@ -61,9 +72,13 @@ class lv2Menu extends Sprite {
             this.selectedBullet = selectedOption.type;
             this.money -= selectedOption.cost;
             selectedOption.cost = 0;
+
+            // Play purchase sound
+            this.purchaseSound.play().catch(err => console.error("Audio error:", err));
         } else {
             this.errorMessage = "Not enough money!";
-            this.errorDisplayFrames = 60;
+            this.error.play().catch(err => console.error("Audio error:", err));
+            this.errorDisplayFrames = 180;
         }
     }
 

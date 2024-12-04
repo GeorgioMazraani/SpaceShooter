@@ -39,8 +39,9 @@ class LevelManager extends Sprite {
         this.selectedBullet = selectedBullet;
         this.shieldPurchased = shieldPurchased;
 
-        this.game.sprites = [];
+        this.game.sprites = this.game.sprites.filter(sprite => sprite instanceof LevelManager);
         this.game.addSprite(this);
+
 
         this[`setupLevel${level}`]();
     }
@@ -51,7 +52,7 @@ class LevelManager extends Sprite {
         const background = new Background("../assets/bg.png", 1, this.game.canvas);
         this.game.addSprite(background);
 
-        const plane = new Plane(200, 400, 3, this.game);
+        const plane = new Plane(canvas.width / 2, canvas.height / 2, 3, this.game);
         this.game.addSprite(plane);
 
         const enemySpawner = new EnemySpawner(this.game, 1);
@@ -68,6 +69,7 @@ class LevelManager extends Sprite {
 
         this.timer = timer;
         this.moneyTracker = moneyTracker;
+        console.log(this.game.sprites)
     }
 
     setupLevel2() {
@@ -75,8 +77,8 @@ class LevelManager extends Sprite {
         this.game.addSprite(background);
 
         const plane = new Plane(
-            200,
-            500,
+            canvas.width / 2,
+            canvas.height / 2,
             3,
             this.game,
             this.selectedBullet,
@@ -98,7 +100,6 @@ class LevelManager extends Sprite {
         this.money = this.moneyTracker.money;
 
         this.backgroundMusic.pause();
-
         this.game.sprites = this.game.sprites.filter(sprite =>
             sprite instanceof MoneyTracker || sprite instanceof lv2Menu
         );
@@ -152,6 +153,7 @@ class LevelManager extends Sprite {
 
         if (!plane || !plane.isActive) {
             console.log("Game Over! Restarting...");
+
             this.game.addSprite(new GameOver(this.game, this, this.backgroundMusic, false));
             return;
         }
