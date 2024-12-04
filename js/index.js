@@ -1,4 +1,3 @@
-// Initialize the game instance
 const game = new Game();
 const backgroundMusic = new Audio('../assets/Sounds/music.mp3');
 backgroundMusic.loop = true;

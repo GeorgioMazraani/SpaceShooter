@@ -11,35 +11,24 @@ class LevelManager extends Sprite {
         this.finalBossSpawned = false;
         this.selectedBullet = "Default";
         this.shieldPurchased = false;
+        this.activeMenu = null;
     }
 
     startGame() {
         console.log("Starting the game...");
         this.backgroundMusic.play();
 
-        // Add LevelManager to game sprites for updates
         this.game.addSprite(this);
         console.log("Added LevelManager to sprites.");
 
-        // Initialize the background and score
         const background = new Background('../assets/bg.png', 1, this.game.canvas);
         this.game.addSprite(background);
 
         const score = new Score(0, 0);
         this.game.addSprite(score);
 
-        // Start Level 1
         this.startLevel(1);
 
-        // Add key event listener
-        window.addEventListener('keydown', (event) => this.handleKeyInput(event));
-    }
-
-    handleKeyInput(event) {
-        const menu = this.game.sprites.find(sprite => sprite instanceof lv2Menu);
-        if (menu) {
-            menu.handleInput(event.key);
-        }
     }
 
     startLevel(level, selectedBullet = "Default", shieldPurchased = false) {
@@ -50,11 +39,9 @@ class LevelManager extends Sprite {
         this.selectedBullet = selectedBullet;
         this.shieldPurchased = shieldPurchased;
 
-        // Clear previous sprites
         this.game.sprites = [];
         this.game.addSprite(this);
 
-        // Setup the specific level
         this[`setupLevel${level}`]();
     }
 
@@ -84,8 +71,6 @@ class LevelManager extends Sprite {
     }
 
     setupLevel2() {
-        console.log("Setting up Level 2 with advanced enemies and upgrades.");
-
         const background = new Background("../assets/bg.png", 1, this.game.canvas);
         this.game.addSprite(background);
 
@@ -110,20 +95,34 @@ class LevelManager extends Sprite {
 
     transitionToLevel2Menu() {
         console.log("Transitioning to Level 2 Menu...");
-        this.game.paused = true;
         this.money = this.moneyTracker.money;
 
+        this.backgroundMusic.pause();
+
+        this.game.sprites = this.game.sprites.filter(sprite =>
+            sprite instanceof MoneyTracker || sprite instanceof lv2Menu
+        );
         const menu = new lv2Menu(this.game, this.money);
+        this.activeMenu = menu;
 
         menu.onMenuExit = () => {
-            this.game.paused = false;
+            this.activeMenu = null;
             this.startLevel(2, menu.selectedBullet, menu.shieldPurchased);
+            this.backgroundMusic.play();
         };
 
-        this.game.addSprite(menu); // Add the menu to the sprites
+        this.game.addSprite(menu);
     }
 
+
+
+
     update() {
+        if (this.activeMenu) {
+            this.activeMenu.update(this.game.sprites, this.game.keys);
+            return;
+        }
+
         this.frameCounter++;
 
         const timer = this.game.sprites.find(sprite => sprite instanceof Timer);
@@ -131,7 +130,6 @@ class LevelManager extends Sprite {
         const asteroids = this.game.sprites.filter(sprite => sprite instanceof Asteroid);
         const plane = this.game.sprites.find(sprite => sprite instanceof Plane);
 
-        // Level 1 logic
         if (this.currentLevel === 1) {
             if (!timer) {
                 console.log("Level 1 complete! Transitioning to Level 2 Menu...");
@@ -140,9 +138,7 @@ class LevelManager extends Sprite {
             }
         }
 
-        // Level 2 logic
         if (this.currentLevel === 2) {
-            console.log(this.advancedSpawner)
             if (
                 this.advancedSpawner &&
                 this.advancedSpawner.allSpawningComplete() &&
@@ -154,14 +150,12 @@ class LevelManager extends Sprite {
             }
         }
 
-        // Check for Game Over
         if (!plane || !plane.isActive) {
             console.log("Game Over! Restarting...");
             this.game.addSprite(new GameOver(this.game, this, this.backgroundMusic, false));
             return;
         }
 
-        // Check for victory (Final Boss defeated)
         const finalBoss = this.game.sprites.find(sprite => sprite instanceof FinalBoss);
         if (this.currentLevel === 2 && this.finalBossSpawned && !finalBoss) {
             console.log("You won the game!");
@@ -169,6 +163,7 @@ class LevelManager extends Sprite {
             return;
         }
     }
+
 
 
     spawnFinalBoss() {

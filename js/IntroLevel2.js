@@ -12,15 +12,15 @@ class lv2Menu extends Sprite {
         this.selectedBullet = "Default";
         this.shieldCost = 25;
         this.shieldPurchased = false;
-        this.canvas = game.canvas;
-        this.ctx = game.ctx;
-        this.options = [];
-        for (let i = 0; i < this.bulletTypes.length; i++) {
-            this.options.push(this.bulletTypes[i]);
-        }
-        this.options.push({ type: "Shield", cost: this.shieldCost });
+        this.options = [...this.bulletTypes, { type: "Shield", cost: this.shieldCost }];
+        this.errorMessage = "";
+        this.errorDisplayFrames = 0;
+        this.isActive = true;
     }
+
     handleInput(key) {
+        if (!this.isActive) return;
+
         switch (key) {
             case "ArrowUp":
                 this.selectedIndex = (this.selectedIndex - 1 + this.options.length) % this.options.length;
@@ -31,70 +31,98 @@ class lv2Menu extends Sprite {
             case "Enter":
                 this.purchaseOption(this.selectedIndex);
                 break;
+            case "x":
+                this.exitMenu();
+                break;
         }
     }
 
-
     purchaseOption(index) {
         const selectedOption = this.options[index];
+
+        if (selectedOption.type === "Shield") {
+            if (this.money >= selectedOption.cost) {
+                this.shieldPurchased = true;
+                this.money -= selectedOption.cost;
+                selectedOption.cost = 0;
+            } else {
+                this.errorMessage = "Not enough money!";
+                this.errorDisplayFrames = 60;
+            }
+            return;
+        }
+
         if (selectedOption.cost === 0) {
-            console.log(`${selectedOption.type} is already purchased!`);
+            this.selectedBullet = selectedOption.type;
             return;
         }
 
         if (this.money >= selectedOption.cost) {
-            if (selectedOption.type === "Shield") {
-                this.purchaseShield();
-            } else {
-                this.selectBullet(selectedOption);
-            }
-            selectedOption.cost = 0; // Mark the option as purchased
-
-            console.log("Purchase successful. Starting Level 2...");
-            if (this.onMenuExit) {
-                this.onMenuExit(); // Trigger the menu exit to start Level 2
-            }
+            this.selectedBullet = selectedOption.type;
+            this.money -= selectedOption.cost;
+            selectedOption.cost = 0;
         } else {
-            console.log("Not enough money!");
+            this.errorMessage = "Not enough money!";
+            this.errorDisplayFrames = 60;
         }
     }
 
-
-
-    selectBullet(bullet) {
-        this.selectedBullet = bullet.type;
-        this.money -= bullet.cost;
-        console.log(`Selected ${bullet.type}. Remaining Money: ${this.money}`);
+    exitMenu() {
+        this.isActive = false;
+        if (this.onMenuExit) {
+            this.onMenuExit();
+        }
     }
 
-    purchaseShield() {
-        this.shieldPurchased = true;
-        this.money -= this.shieldCost;
-        console.log("Shield purchased!");
+    update(sprites, keys) {
+        if (!this.isActive) return true;
+
+        for (let key in keys) {
+            if (keys[key]) {
+                this.handleInput(key);
+                keys[key] = false;
+            }
+        }
+
+        if (this.errorDisplayFrames > 0) {
+            this.errorDisplayFrames--;
+        }
+
+        return false;
     }
 
+    draw(ctx) {
+        ctx.clearRect(0, 0, this.game.canvas.width, this.game.canvas.height);
+        ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+        ctx.fillRect(0, 0, this.game.canvas.width, this.game.canvas.height);
 
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.font = "30px Arial";
-        this.ctx.fillStyle = "white";
-        this.ctx.textAlign = "center";
-        this.ctx.fillText("Choose Your Upgrades for Level 2", this.canvas.width / 2, 100);
+        ctx.font = "30px Arial";
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.fillText("Choose Your Upgrades for Level 2", this.game.canvas.width / 2, 100);
 
         this.options.forEach((option, index) => {
             const y = 150 + index * 50;
-            this.ctx.fillStyle = index === this.selectedIndex ? "yellow" : "white";
-            this.ctx.fillText(`${option.type} (Cost: ${option.cost})`, this.canvas.width / 2, y);
+            ctx.fillStyle = index === this.selectedIndex ? "yellow" : "white";
+            ctx.fillText(`${option.type} (Cost: ${option.cost})`, this.game.canvas.width / 2, y);
         });
 
-        this.ctx.fillStyle = "white";
-        this.ctx.fillText(`Money: $${this.money}`, this.canvas.width / 2, 350);
+        ctx.fillStyle = "white";
+        ctx.fillText(`Money: $${this.money}`, this.game.canvas.width / 2, 350);
 
-        this.ctx.fillText(`Selected Bullet: ${this.selectedBullet}`, this.canvas.width / 2, 400);
+        ctx.fillText(`Selected Bullet: ${this.selectedBullet}`, this.game.canvas.width / 2, 400);
         if (this.shieldPurchased) {
-            this.ctx.fillText(`Shield Purchased`, this.canvas.width / 2, 450);
+            ctx.fillText(`Shield Purchased`, this.game.canvas.width / 2, 450);
         }
+
+        if (this.errorDisplayFrames > 0) {
+            ctx.fillStyle = "red";
+            ctx.font = "20px Arial";
+            ctx.fillText(this.errorMessage, this.game.canvas.width / 2, 550);
+        }
+
+        ctx.fillStyle = "yellow";
+        ctx.font = "20px Arial";
+        ctx.fillText("Press X to start Level 2", this.game.canvas.width / 2, 600);
     }
 }
