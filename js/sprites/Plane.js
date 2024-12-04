@@ -32,7 +32,7 @@ class Plane extends Sprite {
         }
 
         if (shieldPurchased) {
-            this.activateShield(20);
+            this.activateShield();
         }
     }
 
@@ -50,8 +50,13 @@ class Plane extends Sprite {
     activateShield(durationInSeconds = 10) {
         this.shieldActive = true;
         this.shieldDurationFrames = durationInSeconds * 60;
+
+        const shieldEffect = new Shield(this.x, this.y, this.width * 2, this.height * 2, this.game);
+        this.game.sprites.push(shieldEffect);
+
         console.log(`Shield activated for ${durationInSeconds} seconds!`);
     }
+
 
 
     takeDamage(amount) {
@@ -66,7 +71,6 @@ class Plane extends Sprite {
         if (this.health <= 0) {
             this.health = 0;
             this.isActive = false;
-            this.game.addSprite(new GameOver(this.game));
             console.log("Game Over!");
         }
     }
@@ -156,16 +160,7 @@ class Plane extends Sprite {
                 5
             );
 
-            if (this.shieldActive) {
-                ctx.strokeStyle = "blue";
-                ctx.lineWidth = 3;
-                ctx.strokeRect(
-                    this.x - this.width / 2,
-                    this.y - this.height / 2,
-                    this.width,
-                    this.height
-                );
-            }
+
         }
     }
 
